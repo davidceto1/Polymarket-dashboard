@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polymarket Dashboard</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0d1117;
+      --surface:     #161b22;
+      --surface2:    #21262d;
+      --border:      #30363d;
+      --text:        #e6edf3;
+      --text-muted:  #8b949e;
+      --accent:      #58a6ff;
+      --yes:         #3fb950;
+      --yes-bg:      #0d2719;
+      --no:          #f85149;
+      --no-bg:       #2d0f0f;
+      --other:       #d29922;
+      --other-bg:    #2e1f00;
+      --radius:      10px;
+    }
+
+    html { font-size: 15px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ── Header ───────────────────────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(13, 17, 23, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo svg { flex-shrink: 0; }
+
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .search-wrap {
+      flex: 1;
+      min-width: 180px;
+      max-width: 480px;
+      position: relative;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 0.65rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    #search {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.875rem;
+      padding: 0.45rem 0.75rem 0.45rem 2.1rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    #search:focus { border-color: var(--accent); }
+    #search::placeholder { color: var(--text-muted); }
+
+    .meta {
+      margin-left: auto;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* ── Main ─────────────────────────────────────────────────────── */
+    main {
+      padding: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ── State messages ───────────────────────────────────────────── */
+    .state-msg {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      min-height: 320px;
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .err-icon { font-size: 2rem; }
+
+    /* ── Grid ─────────────────────────────────────────────────────── */
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    /* ── Card ─────────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .card-question {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.45;
+      /* Clamp to 3 lines */
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* ── Outcome badges ───────────────────────────────────────────── */
+    .outcomes {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .outcome {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      border-radius: 5px;
+      padding: 0.25rem 0.55rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    .outcome.yes  { background: var(--yes-bg);   color: var(--yes);   border-color: #1a4a2a; }
+    .outcome.no   { background: var(--no-bg);    color: var(--no);    border-color: #5a1a1a; }
+    .outcome.other{ background: var(--other-bg); color: var(--other); border-color: #5a3a00; }
+
+    .outcome-label { opacity: 0.85; font-weight: 500; }
+    .outcome-price { font-weight: 700; }
+
+    /* ── Stats row ────────────────────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem 0.75rem;
+      margin-top: auto;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .stat.end-date { grid-column: span 2; }
+
+    /* ── Responsive tweaks ────────────────────────────────────────── */
+    @media (max-width: 500px) {
+      header { padding: 0.75rem 1rem; }
+      main   { padding: 1rem; }
+      #grid  { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <!-- simple chart icon -->
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+    </svg>
+    <h1>Polymarket Dashboard</h1>
+  </div>
+
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input id="search" type="search" placeholder="Search markets…" autocomplete="off" />
+  </div>
+
+  <span class="meta" id="meta"></span>
+</header>
+
+<main>
+  <div id="container">
+    <div class="state-msg" id="loading">
+      <div class="spinner"></div>
+      <span>Loading markets…</span>
+    </div>
+  </div>
+</main>
+
+<script>
+  'use strict';
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  let allMarkets = [];
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  function escHtml(str) {
+    if (!str) return '';
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  /** Parse a value that may be a proper array or a JSON-encoded array string. */
+  function parseArray(val) {
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') {
+      try { return JSON.parse(val); } catch { return []; }
+    }
+    return [];
+  }
+
+  /** Format a numeric string as a dollar amount with thousands separators. */
+  function fmtDollar(val) {
+    if (val === null || val === undefined || val === '') return '—';
+    const n = parseFloat(val);
+    if (isNaN(n)) return '—';
+    if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(2) + 'M';
+    if (n >= 1_000)     return '$' + (n / 1_000).toFixed(1) + 'K';
+    return '$' + n.toFixed(2);
+  }
+
+  /** Format an ISO date string to a human-readable local date. */
+  function fmtDate(val) {
+    if (!val) return '—';
+    const d = new Date(val);
+    if (isNaN(d)) return val;
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  /** Return a CSS class name based on the outcome label. */
+  function outcomeClass(label) {
+    const l = (label || '').toLowerCase();
+    if (l === 'yes') return 'yes';
+    if (l === 'no')  return 'no';
+    return 'other';
+  }
+
+  // ── Card rendering ─────────────────────────────────────────────────────────
+
+  function buildCard(m) {
+    const outcomes      = parseArray(m.outcomes);
+    const outcomePrices = parseArray(m.outcomePrices);
+
+    const outcomesHtml = outcomes.map((label, i) => {
+      const raw   = outcomePrices[i];
+      const price = (raw !== undefined && raw !== null && raw !== '')
+        ? (parseFloat(raw) * 100).toFixed(1) + '%'
+        : '—';
+      const cls = outcomeClass(label);
+      return `<span class="outcome ${cls}">
+                <span class="outcome-label">${escHtml(label)}</span>
+                <span class="outcome-price">${price}</span>
+              </span>`;
+    }).join('');
+
+    return `<article class="card">
+      <p class="card-question">${escHtml(m.question)}</p>
+      <div class="outcomes">${outcomesHtml || '<span style="color:var(--text-muted);font-size:.8rem">No outcome data</span>'}</div>
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">Volume</span>
+          <span class="stat-value">${fmtDollar(m.volume)}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Liquidity</span>
+          <span class="stat-value">${fmtDollar(m.liquidity)}</span>
+        </div>
+        <div class="stat end-date">
+          <span class="stat-label">End Date</span>
+          <span class="stat-value">${fmtDate(m.endDate)}</span>
+        </div>
+      </div>
+    </article>`;
+  }
+
+  // ── Render helpers ─────────────────────────────────────────────────────────
+
+  function renderGrid(markets) {
+    const container = document.getElementById('container');
+    const metaEl    = document.getElementById('meta');
+
+    if (!markets.length) {
+      container.innerHTML = `<div class="state-msg">
+        <span class="err-icon">🔍</span>
+        <span>No markets match your search.</span>
+      </div>`;
+      metaEl.textContent = '';
+      return;
+    }
+
+    const grid = document.createElement('div');
+    grid.id = 'grid';
+    grid.innerHTML = markets.map(buildCard).join('');
+
+    container.innerHTML = '';
+    container.appendChild(grid);
+    metaEl.textContent = `${markets.length} market${markets.length === 1 ? '' : 's'}`;
+  }
+
+  function renderError(msg) {
+    document.getElementById('container').innerHTML = `<div class="state-msg">
+      <span class="err-icon">⚠️</span>
+      <span>${escHtml(msg)}</span>
+    </div>`;
+  }
+
+  // ── Search ─────────────────────────────────────────────────────────────────
+
+  document.getElementById('search').addEventListener('input', function () {
+    const q = this.value.trim().toLowerCase();
+    renderGrid(q
+      ? allMarkets.filter(m => (m.question || '').toLowerCase().includes(q))
+      : allMarkets);
+  });
+
+  // ── Data fetching ──────────────────────────────────────────────────────────
+
+  async function fetchMarkets() {
+    try {
+      const res = await fetch('/api/markets');
+      if (!res.ok) throw new Error(`Server returned ${res.status} ${res.statusText}`);
+      allMarkets = await res.json();
+      renderGrid(allMarkets);
+    } catch (err) {
+      console.error('Failed to load markets:', err);
+      renderError('Could not load markets. Is the API server running?');
+    }
+  }
+
+  fetchMarkets();
+</script>
+
+</body>
+</html>
