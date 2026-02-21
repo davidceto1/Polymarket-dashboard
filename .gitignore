@@ -1,0 +1,19 @@
+# Build output
+bin/
+obj/
+
+# User-specific / local config (may contain wallet addresses or secrets)
+appsettings.Development.json
+appsettings.Local.json
+*.user
+
+# Rider / VS / VS Code
+.idea/
+.vs/
+.vscode/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
