@@ -28,6 +28,14 @@ builder.Services.AddHttpClient<IGammaApiService, GammaApiService>(client =>
     client.Timeout = TimeSpan.FromSeconds(15);
 });
 
+// Typed HttpClient for the Polymarket Data API (portfolio/positions)
+builder.Services.AddHttpClient<IPortfolioService, PortfolioService>(client =>
+{
+    client.BaseAddress = new Uri("https://data-api.polymarket.com");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
+
 // Background polling service – pre-warms and periodically refreshes the cache
 builder.Services.AddHostedService<MarketPollingService>();
 
