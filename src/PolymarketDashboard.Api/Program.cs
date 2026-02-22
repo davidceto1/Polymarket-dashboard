@@ -39,7 +39,7 @@ builder.Services.AddHttpClient<IPortfolioService, PortfolioService>(client =>
 // Typed HttpClient for the CLOB API (price history + order book)
 builder.Services.AddHttpClient<IMarketDetailService, MarketDetailService>(client =>
 {
-    client.BaseAddress = new Uri("https://clob-api.polymarket.com");
+    client.BaseAddress = new Uri("https://clob.polymarket.com");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
     client.Timeout = TimeSpan.FromSeconds(15);
 });

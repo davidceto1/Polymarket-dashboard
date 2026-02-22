@@ -528,8 +528,8 @@ async function openDetail(m) {
   const yesTokenId = tokenIds[0] ?? '';
 
   await Promise.all([
-    m.conditionId ? loadChart(m.conditionId) : Promise.resolve(),
-    yesTokenId    ? loadOrderBook(yesTokenId) : Promise.resolve(),
+    yesTokenId ? loadChart(yesTokenId)        : Promise.resolve(),
+    yesTokenId ? loadOrderBook(yesTokenId)    : Promise.resolve(),
   ]);
 }
 
@@ -608,11 +608,11 @@ function buildDetailBody(m) {
     ${descHtml}`;
 }
 
-async function loadChart(conditionId) {
+async function loadChart(tokenId) {
   const container = document.getElementById('chart-container');
   if (!container) return;
   try {
-    const res = await fetch(`/api/market-detail/history?conditionId=${encodeURIComponent(conditionId)}`);
+    const res = await fetch(`/api/market-detail/history?tokenId=${encodeURIComponent(tokenId)}`);
     if (!res.ok) throw new Error(res.status);
     const points = await res.json();
 
