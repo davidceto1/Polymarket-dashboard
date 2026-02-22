@@ -36,6 +36,14 @@ builder.Services.AddHttpClient<IPortfolioService, PortfolioService>(client =>
     client.Timeout = TimeSpan.FromSeconds(15);
 });
 
+// Typed HttpClient for the CLOB API (price history + order book)
+builder.Services.AddHttpClient<IMarketDetailService, MarketDetailService>(client =>
+{
+    client.BaseAddress = new Uri("https://clob-api.polymarket.com");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
+
 // Background polling service – pre-warms and periodically refreshes the cache
 builder.Services.AddHostedService<MarketPollingService>();
 
