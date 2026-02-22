@@ -22,12 +22,12 @@ public sealed class MarketDetailService : IMarketDetailService
     }
 
     public async Task<IReadOnlyList<PricePoint>> GetPriceHistoryAsync(
-        string conditionId,
+        string tokenId,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var url = $"/prices-history?market={Uri.EscapeDataString(conditionId)}&interval=max&fidelity=60";
+            var url = $"/prices-history?market={Uri.EscapeDataString(tokenId)}&interval=max&fidelity=60";
             var response = await _httpClient.GetAsync(url, cancellationToken);
             response.EnsureSuccessStatusCode();
 
@@ -42,7 +42,7 @@ public sealed class MarketDetailService : IMarketDetailService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to fetch price history for market {ConditionId}", conditionId);
+            _logger.LogError(ex, "Failed to fetch price history for token {TokenId}", tokenId);
             return [];
         }
     }

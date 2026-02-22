@@ -56,13 +56,13 @@ public sealed class MarketDetailController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<PricePoint>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetHistory(
-        [FromQuery] string conditionId,
+        [FromQuery] string tokenId,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(conditionId))
-            return BadRequest(new { error = "conditionId is required." });
+        if (string.IsNullOrWhiteSpace(tokenId))
+            return BadRequest(new { error = "tokenId is required." });
 
-        var history = await _detailService.GetPriceHistoryAsync(conditionId, cancellationToken);
+        var history = await _detailService.GetPriceHistoryAsync(tokenId, cancellationToken);
         return Ok(history);
     }
 
